@@ -4,4 +4,5 @@ fun main() {
 
     board.addMoves(moves)
     board.print()
+    board.printRes()
 }

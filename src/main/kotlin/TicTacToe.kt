@@ -1,50 +1,66 @@
 class TicTacToe {
-    val data = MutableList(3) { mutableListOf<Char>() }
+    val data = MutableList(3) { MutableList<Char>(3) {' '} }
     val horizontal = MutableList<Int>(3) {0}
     val vertical = MutableList<Int>(3) {0}
     var diag = 0
     var antiDiag = 0
-    var notFinished = false
+    var numOfMoves = 0
 
-    fun addMoves (input: String) {
-        for (i in 0 until input.length) {
-            val player = input[i]
-            val row = i / 3
-            val col = i % 3
-            val res = when (player) {
-                'X' -> 1
-                'O' -> -1
-                else ->  {
-                    notFinished = true
-                    0
-                }
-            }
-            horizontal[row] += res
-            vertical[col] += res
-            if (row == col) {
-                diag += res
-            }
-            if (row + col == 2) {
-                antiDiag += res
-            }
-
-            this.data[i/3].add(player)
+    fun startGame() {
+        print()
+        var player = 1
+        numOfMoves = this.data.first().size * this.data.size
+        while (!isGameOver()) {
+            addMove(player)
+            player *= -1
+            print()
         }
     }
 
-    fun printRes() {
+    fun addMove (_player: Int) {
+        var validMove = false
+        val player = if (_player > 0) 'X' else 'O'
+
+        do {
+            try {
+                val (row, col) = readln().split(" ").map { it.toInt() - 1 }
+                if(row !in 0 .. 2 || col !in 0 .. 2) {
+                    println("Coordinates should be from 1 to 3!")
+                }
+                else if (this.data[row][col] == ' ') {
+                    this.data[row][col] = player
+                    horizontal[row] += _player
+                    vertical[col] += _player
+                    diag += _player
+                    antiDiag += _player
+                    validMove = true
+                } else {
+                    println("This cell is occupied! Choose another one!")
+                }
+            } catch (e: Exception) {
+                println("You should enter numbers!")
+            }
+        } while (!validMove)
+        numOfMoves--
+    }
+
+    fun isGameOver(): Boolean {
         val horizontalMax = horizontal.maxOrNull()
         val horizontalMin = horizontal.minOrNull()
         val verticalMax = vertical.maxOrNull()
         val verticalMin = vertical.minOrNull()
 
-        when {
-            horizontal.sum() > 1  || horizontal.sum() < -1 || (horizontalMax == 3 && horizontalMin == -3) || (verticalMin == -3 && verticalMax == 3) -> println("Impossible")
-            horizontalMax == 3 || verticalMax == 3 || diag == 3 || antiDiag == 3 -> println("X wins")
-            horizontalMin == -3 || verticalMin == -3 || diag == -3 || antiDiag == -3 -> println("O wins")
-            notFinished == true -> println("Game not finished")
-            else -> println("Draw")
+        if (horizontalMax == 3  || verticalMax == 3 || diag == 3 || antiDiag == 3) {
+            println("X wins")
+            return true
+        } else if (horizontalMin == -3  || verticalMin == -3 || diag == -3 || antiDiag == -3) {
+            println("O wins")
+            return true
+        } else if(numOfMoves == 0) {
+            println("Draw")
+            return true
         }
+        return false
     }
     fun print() {
         println("-".repeat(9))
